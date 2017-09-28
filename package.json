@@ -5,8 +5,8 @@
   "main": "index.js",
   "scripts": {
     "pretest": "npm run clean",
-    "test": "run-s test:*",
-    "test:http-load": "node bin/index.js ./example/http-load.json && node test/test-http-load.js",
+    "test": "tape test/**/test.js",
+    "posttest": "npm run clean",
     "clean": "rm -rf .imperial-lambda && rm -rf .test-*"
   },
   "repository": {
