@@ -6,14 +6,43 @@ The primary use case for this is to do simple HTTP load testing, but
 the general case is if you want to run a large number of AWS Lambda
 instances to do some small chunk of work.
 
-## Run Scripts
+## Lambda Limitations
 
-You will need to configure AWS (see below), and then run this script
-referencing a configuration file:
+By default you can only run 100 simultaneous Lambda instances, but
+you can message Amazon and request them to increase the number.
 
-```bash
-$ imperial-lambda run /path/to/runnable.json
-```
+Lambdas have a short runtime enforced. If your executed code does
+not end before that time, it will be summarily terminated by AWS.
+
+Lambdas also only have a single thread available, so depending on
+your script, running concurrent functions may not be helpful. You
+will primarily find a benefit if your scripts are spending a lot
+of time in I/O operations, such as HTTP/database requests.
+
+## Legal Concerns
+
+***Misuse* of this module could result in jail time.**
+
+In particular, running load testing against a server is in
+fact a type of DDoS attack. Doing this to a server/service
+that you do not own is unethical and quite likely illegal.
+
+If you are doing load testing, you may want to contact Amazon
+and let them know what you are up to, so that they don't lock
+down your account pre-emptively.
+
+## Run Script
+
+You will need to configure AWS (see below), and then proceed
+with the following commands:
+
+1. `build`: Construct the script which will be run in Lambda.
+2. `load`: Push script to AWS Lambda and configure SQS.
+3. `launch`: Run the scripts!
+
+Run each of these with: `imperial-lambda [command]`
+
+Get help on any command with: `imperial-lambda --help [command]`
 
 ### Options
 
@@ -127,29 +156,6 @@ Replace the appropriate properties.
 4. Select `Review` and name the role something like `imperial_shuttle`.
 5. Review and create role.
 6. Select the created role, and copy the `Role ARN` for local use.
-
-## Lambda Limitations
-
-By default you can only run 100 simultaneous Lambda instances, but
-you can message Amazon and request them to increase the number.
-
-Lambdas have a short runtime enforced. If your executed code does
-not end before that time, it will be summarily terminated by AWS.
-
-## Legal Concerns
-
-If you are running load testing against your server, you are actually
-performing a type of DDoS attack.
-
-This is fine, but if you, through malice or accident, run load testing
-against a target that doesn't belong to you, you would be behaving
-unethically and quite likely breaking the law.
-
-**Misuse of this module could result in jail time.**
-
-If your load testing is at all large, you may want to contact
-Amazon and let them know what you are up to, so that they don't
-lock down your account pre-emptively.
 
 ## License
 
