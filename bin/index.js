@@ -7,7 +7,7 @@ const aws = require('./../lib/aws')
 
 const commands = [
     'build',
-    'warmup',
+    'load',
     'launch'
 ]
 
