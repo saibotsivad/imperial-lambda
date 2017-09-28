@@ -28,7 +28,8 @@ module.exports = ({ buildFolder, role, aws }) => {
         getQueueArn,
         subscribeToTopic,
         setQueueAttributes,
-        createLambda
+        createLambda,
+        deleteLambda
     } = awsCommands
 
     return new Promise((resolve, reject) => {
@@ -49,4 +50,13 @@ module.exports = ({ buildFolder, role, aws }) => {
         })
     })
     .then(() => createLambda({ role, zipFile: path.join(buildFolder, 'build.zip') }))
+    .catch(error => {
+        if (error.name === 'ResourceConflictException') {
+            // TODO in theory we could delete it and then create it?
+            // http://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/Lambda.html#deleteFunction-property
+            console.log('AWS Lambda function exists already. Delete it manually from AWS.')
+            return { loggedErrors: true }
+        }
+        throw error
+    })
 }

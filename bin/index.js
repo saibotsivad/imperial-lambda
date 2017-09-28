@@ -54,8 +54,12 @@ const options = {
 }
 
 require('./../commands/' + command)(options, configuration.data)
-    .then(() => {
-        console.log('Process complete without errors.')
+    .then((response) => {
+        if (response && response.loggedErrors) {
+            console.log('Process exited prematurely.')
+        } else {
+            console.log('Process complete without errors.')
+        }
     })
     .catch(error => {
         console.log('Process exited with errors:')
