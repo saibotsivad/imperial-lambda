@@ -17,6 +17,9 @@ test('that the build output is as expected', t => {
     }
     build(options)
         .then(() => {
+            const runnableJson = require(path.join(buildFolder, 'runnable.json'))
+            t.deepEqual(runnableJson, { concurrent: 5, data: 'hello world' }, 'the data was written correctly')
+
             const outFolder = path.join(buildFolder, 'unzipped')
             mkdirp.sync(outFolder)
             extract(path.join(buildFolder, 'build.zip'), { dir: outFolder }, error => {
