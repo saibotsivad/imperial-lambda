@@ -2,9 +2,11 @@
     "script": "./http-load.js",
     "data": {
         "request": {
-            "url": "http://site.com",
-            "headers": {
-                "x-auth-key": "my-secret-key"
+            "url": "http://saibotsivad.com",
+            "options": {
+                "headers": {
+                    "x-auth-key": "my-secret-key"
+                }
             }
         }
     }
