@@ -2,6 +2,7 @@ const fs = require('fs')
 const mkdirp = require('mkdirp')
 const path = require('path')
 const jszip = require('jszip')
+const copyFile = require('cp-file')
 
 const rollup = require('rollup')
 const commonjs = require('rollup-plugin-commonjs')
@@ -35,11 +36,13 @@ module.exports = ({ buildFolder, cwd, script, concurrent, data }) => {
     fs.writeFileSync(path.join(buildFolder, 'runnable.json'), JSON.stringify({ concurrent, data }, undefined, 2), { encoding: 'utf8' })
     // write a module file which our scripts can then reference
     fs.writeFileSync(path.join(buildFolder, 'runnable.js'), runnable(script), { encoding: 'utf8' })
+    // copy the lambda runnable for relative path goodness
+    copyFile.sync(path.join(__dirname, '../lib/lambda-runnable.js'), path.join(buildFolder, 'lambda-runnable.js'))
 
     // rollup the runnable script into an AWS Lambda script
     return rollup
         .rollup({
-            input: path.join(cwd, 'lib/lambda-runnable.js'),
+            input: path.join(buildFolder, 'lambda-runnable.js'),
             plugins: [
                 json(),
                 builtins(),

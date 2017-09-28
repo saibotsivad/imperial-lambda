@@ -1,0 +1,4 @@
+{
+    "script": "./command-build.js",
+    "data": "hello"
+}
