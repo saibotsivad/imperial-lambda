@@ -9,7 +9,6 @@ const commonjs = require('rollup-plugin-commonjs')
 const nodeResolve = require('rollup-plugin-node-resolve')
 const babel = require('rollup-plugin-babel')
 const json = require('rollup-plugin-json')
-const builtins = require('rollup-plugin-node-builtins')
 
 const runnable = script => `// This is an automatically built file. Do not edit it.
 import runnable from '${script}'
@@ -43,11 +42,27 @@ module.exports = ({ buildFolder, cwd, script, concurrent, data }) => {
     return rollup
         .rollup({
             input: path.join(buildFolder, 'lambda-runnable.js'),
+            format: 'cjs',
             plugins: [
                 json(),
-                builtins(),
-                nodeResolve(),
-                commonjs(),
+                nodeResolve({
+                    jsnext: true,
+                    preferBuiltins: true,
+                    extensions: [ '.js', '.json' ]
+                }),
+                commonjs({
+                    ignore: [
+                        'electron',
+                        'http',
+                        'https',
+                        'buffer',
+                        'events',
+                        'stream',
+                        'url',
+                        'querystring',
+                        'zlib'
+                    ]
+                }),
                 babel({
                     babelrc: false,
                     presets: [

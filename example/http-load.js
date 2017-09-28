@@ -1,43 +1,53 @@
-import get from 'simple-get'
+const got = require('got')
 
 /*
-The property `data` is *not validated* and is expected to
-be an `option` object as you would pass to `simple-get`.
+This demo shows what a simple script might
+look like. It makes an HTTP request to a
+defined URL, and records the length of time
+it took to complete the request.
 
-    {
-      request: {
-        url: 'http://site.com/?things=stuff',
-        method: 'GET',
-        headers: {
-          'x-auth-key': 'my-secret-auth-key'
-        }
-      }
+The property `data` is *not validated* and is
+expected to contain an object like:
+
+{
+  request: {
+    url: 'http://site.com',
+    options: {
+      // the options passed to the NodeJS `http` call
     }
+  }
+}
 
 The response of this module is formatted to look like:
 
 {
   status: 200,
-  milliseconds: 307
+  startTime: 1506618940691,
+  endTime: 1506618952017
 }
 
 */
 
 const now = () => new Date().getTime()
 
-export default data => {
-    const start = now()
-    return new Promise((resolve, reject) => {
-        get(data.request, (error, response) => {
-            const output = {
+module.exports = data => {
+    const startTime = now()
+    return got(data.request.url, data.request.options)
+        .then(response => {
+            return {
                 status: response.statusCode,
-                milliseconds: now() - start
-            }
-            if (error) {
-                reject(output)
-            } else {
-                resolve(output)
+                message: response.statusMessage,
+                url: response.url,
+                startTime,
+                endTime: now()
             }
         })
-    })
+        .catch(error => {
+            return {
+                status: error.statusCode,
+                error: error.message,
+                startTime,
+                endTime: now()
+            }
+        })
 }

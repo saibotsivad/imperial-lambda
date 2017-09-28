@@ -48,5 +48,5 @@ module.exports = ({ buildFolder, role, aws }) => {
             }
         })
     })
-    .then(() => createLambda({ buildFolder, role, lambda }))
+    .then(() => createLambda({ role, zipFile: path.join(buildFolder, 'build.zip') }))
 }
