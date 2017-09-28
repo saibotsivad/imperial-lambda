@@ -3,6 +3,7 @@
 const minimist = require('minimist')
 const fs = require('fs')
 const path = require('path')
+const aws = require('./../lib/aws')
 
 const commands = [
     'build',
@@ -48,7 +49,8 @@ const options = {
     lambdas: argv.lambdas || argv.l || configuration.lambdas || 1,
     concurrent: argv.concurrent || argv.c || configuration.concurrent || 1,
     role: argv.role || argv.r || configuration.role,
-    data: configuration.data
+    data: configuration.data,
+    aws
 }
 
 require('./../commands/' + command)(options, configuration.data)

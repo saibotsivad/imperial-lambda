@@ -2,18 +2,9 @@ const fs = require('fs')
 const path = require('path')
 const { waterfall, constant } = require('async')
 
-const {
-    createTopic,
-    createQueue,
-    getQueueArn,
-    subscribeToTopic,
-    setQueueAttributes,
-    createLambda
-} = require('./../lib/amazon-commands')
-
 const DEFAULT_REGION = 'us-west-2'
 
-module.exports = ({ cwd, buildFolder, script, role, lambdas, concurrent, data }) => {
+module.exports = ({ buildFolder, role, aws }) => {
     if (!process.env.AWS_REGION) {
         console.log(`AWS_REGION is not set, defaulting to "${DEFAULT_REGION}".`)
     }
@@ -27,24 +18,27 @@ module.exports = ({ cwd, buildFolder, script, role, lambdas, concurrent, data })
         process.exit(1)
     }
 
-    // Configure AWS region. NOTE: This means you can only test from one region at a time.
-    AWS.config.update({
+    const awsCommands = aws({
         region: process.env.AWS_REGION || DEFAULT_REGION
     })
 
-    // Create the Amazon services
-    const sns = new AWS.SNS()
-    const sqs = new AWS.SQS()
-    const lambda = new AWS.Lambda()
+    const {
+        createTopic,
+        createQueue,
+        getQueueArn,
+        subscribeToTopic,
+        setQueueAttributes,
+        createLambda
+    } = awsCommands
 
     return new Promise((resolve, reject) => {
         waterfall([
             constant({}),
-            createTopic(sns),
-            createQueue(sqs),
-            getQueueArn(sqs),
-            subscribeToTopic(sns),
-            setQueueAttributes(sqs)
+            createTopic,
+            createQueue,
+            getQueueArn,
+            subscribeToTopic,
+            setQueueAttributes
         ], (error, context) => {
             if (error) {
                 reject(error)
