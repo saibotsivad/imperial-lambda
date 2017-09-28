@@ -109,6 +109,16 @@ Log in to the [AWS Console](https://console.aws.amazon.com/) and then:
 5. Review and create user.
 6. Copy the `Access key ID` and the `Secret access key` for local use.
 
+Create a file in `~/.aws/credentials` that looks like this:
+
+```txt
+[imperial_lambda]
+aws_access_key_id=ACCESS_KEY_ID
+aws_secret_access_key=SECRET_ACCESS_KEY
+```
+
+Replace the appropriate properties.
+
 ### IAM Role
 
 1. Navigate to: `Services > IAM > Roles > Create Role`.

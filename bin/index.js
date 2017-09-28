@@ -3,9 +3,22 @@
 const minimist = require('minimist')
 const fs = require('fs')
 const path = require('path')
-const imperialLambda = require('../')
 
-const argv = minimist(process.argv.slice(2))
+const commands = [
+    'build',
+    'warmup',
+    'launch'
+]
+
+const command = process.argv[2]
+if (commands.indexOf(command) < 0) {
+    console.log('Command not supported.')
+    console.log('Try: imperial-lambda [command]')
+    console.log('Where [command] is: build, run')
+    process.exit(1)
+}
+
+const argv = minimist(process.argv.slice(3))
 
 const configurationPath = path.isAbsolute(argv._[0])
     ? argv._[0]
@@ -29,13 +42,16 @@ try {
 }
 
 const options = {
+    cwd: process.cwd(),
     buildFolder: path.join(process.cwd(), '.imperial-lambda'),
     script: scriptFilename,
     lambdas: argv.lambdas || argv.l || configuration.lambdas || 1,
-    concurrent: argv.concurrent || argv.c || configuration.concurrent || 1
+    concurrent: argv.concurrent || argv.c || configuration.concurrent || 1,
+    role: argv.role || argv.r || configuration.role,
+    data: configuration.data
 }
 
-imperialLambda(options, configuration.data)
+require('./../commands/' + command)(options, configuration.data)
     .then(() => {
         console.log('Process complete without errors.')
     })
