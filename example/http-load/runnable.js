@@ -30,9 +30,10 @@ The response of this module is formatted to look like:
 
 const now = () => new Date().getTime()
 
-module.exports = ({ data, event }) => {
+module.exports = ({ event }) => {
+    const request = event.data.request
     const startTime = now()
-    return got(data.request.url, data.request.options)
+    return got(request.url, request.options)
         .then(response => {
             return {
                 status: response.statusCode,

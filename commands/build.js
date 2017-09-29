@@ -1,7 +1,8 @@
 const fs = require('fs')
 const mkdirp = require('mkdirp')
 const path = require('path')
-const buildZippedScript = require('../lib/build-zipped-script.js')
+const createLambdaScript = require('../lib/create-lambda-script.js')
+const createLambdaZip = require('../lib/create-lambda-zip.js')
 const setupAmazonSqs = require('../lib/setup-amazon-sqs.js')
 const createAmazonLambda = require('../lib/aws-create-lambda.js')
 
@@ -25,7 +26,8 @@ module.exports = (filePath, { region, queueName, role }) => {
             fs.writeFileSync(path.join(buildFolder, 'aws.json'), JSON.stringify(awsConfiguration, undefined, 2), { encoding: 'utf8' })
 
             console.log('Building Lambda runnable script...')
-            return buildZippedScript({ scriptPath: filePath })
+            return createLambdaScript({ scriptPath: filePath })
+                .then(() => createLambdaZip())
                 .then(zipFile => {
 
                     console.log('Deploying to AWS as Lambda function...')

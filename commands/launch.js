@@ -1,3 +1,3 @@
-module.exports = ({ cwd, buildFolder, script, lambdas, concurrent, data }) => {
+module.exports = (filePath, {}) => {
     // must return a promise
 }
