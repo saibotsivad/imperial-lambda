@@ -51,17 +51,24 @@ module.exports = (filePath, argv) => {
     const bullets = parseInt(argv.b || argv.bullets || runnable.configuration.bullets, 10) || 1
 
     runnable.configuration.guns = guns
-    runnable.configuration.bullets = bullets
+    runnable.configuration.bullets = Math.round(bullets / guns)
+
+    const totalBulletsBeforeRounding = guns * bullets
+    const totalBulletsAfterRounding = runnable.configuration.guns * runnable.configuration.bullets
+    const leftoverBullets = totalBulletsBeforeRounding - totalBulletsAfterRounding
+    if (leftoverBullets) {
+        console.log(`Ships could not be loaded with all bullets. Remaining: ${totalBulletsAfterRounding}`)
+    }
 
     const awsConfiguration = require(path.join(__dirname, '../docking-station/aws.json'))
     const send = sendToSns(awsConfiguration)
 
     const start = new Date()
     console.log(`Launching the Imperial Lambda fleet at ${start.toISOString()}`)
-    console.log(`Bullets: ${bullets}`)
+    console.log(`Bullets: ${totalBulletsAfterRounding}`)
     console.log(`Guns:    ${guns}`)
 
-    const shots = new Array(bullets)
+    const shots = new Array(runnable.configuration.bullets)
         .fill(runnable)
         .map((value, index) => () => send(value))
 
@@ -70,7 +77,8 @@ module.exports = (filePath, argv) => {
             const end = new Date()
             console.log(`Launch Completed:       ${end.toISOString()}`)
             console.log(`Mission Time (seconds): ${(end.getTime() - start.getTime()) / 1000}`)
-            console.log(`Shots Fired:            ${bullets}`)
+            console.log(`Lambdas Launched:       ${runnable.configuration.bullets}`)
+            console.log(`Shots Fired:            ${totalBulletsAfterRounding}`)
             return results
         })
         .then(() => {

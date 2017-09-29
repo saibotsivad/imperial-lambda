@@ -6,7 +6,7 @@ const createLambdaZip = require('../lib/create-lambda-zip.js')
 const setupAmazonMessaging = require('../lib/aws-setup-messaging.js')
 const createAmazonLambda = require('../lib/aws-create-lambda.js')
 
-const forceHelpText = `'A Lambda function already exists with that name.
+const forceHelpText = `A Lambda function already exists with that name.
 You can delete it manually from AWS or use --force to overwrite it.'`
 
 module.exports = (filePath, { region, queueName, role, force }) => {
