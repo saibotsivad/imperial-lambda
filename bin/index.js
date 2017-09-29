@@ -26,9 +26,10 @@ if (!commands[command]) {
 
 const argv = minimist(process.argv.slice(3))
 
-const filePath = path.isAbsolute(argv._[0])
-    ? argv._[0]
-    : path.join(process.cwd(), argv._[0])
+const file = argv._[0]
+const filePath = file && path.isAbsolute(file)
+    ? file
+    : file && path.join(process.cwd(), file)
 
 commands[command](filePath, argv)
     .then((response) => {

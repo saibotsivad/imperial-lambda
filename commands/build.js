@@ -3,7 +3,7 @@ const mkdirp = require('mkdirp')
 const path = require('path')
 const createLambdaScript = require('../lib/create-lambda-script.js')
 const createLambdaZip = require('../lib/create-lambda-zip.js')
-const setupAmazonSqs = require('../lib/setup-amazon-sqs.js')
+const setupAmazonSqs = require('../lib/aws-setup-sqs.js')
 const createAmazonLambda = require('../lib/aws-create-lambda.js')
 
 module.exports = (filePath, { region, queueName, role }) => {

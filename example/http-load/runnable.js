@@ -39,7 +39,6 @@ module.exports = ({ event }) => {
                 status: response.statusCode,
                 message: response.statusMessage,
                 url: response.url,
-                event,
                 startTime,
                 endTime: now()
             }

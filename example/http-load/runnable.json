@@ -1,5 +1,4 @@
 {
-    "script": "./http-load.js",
     "data": {
         "request": {
             "url": "https://fanx-apif-qa.azurewebsites.net/api/appdata",
