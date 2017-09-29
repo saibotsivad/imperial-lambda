@@ -1,4 +1,4 @@
 /node_modules
+/docking-station
 .DS_Store
-.imperial-lambda
 .test-*

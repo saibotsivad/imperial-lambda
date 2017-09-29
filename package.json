@@ -10,7 +10,7 @@
     "pretestonline": "node bin/index.js build example/http-load.json",
     "testonline": "node example/http-load.test.js",
     "posttestonline": "npm run clean",
-    "clean": "rm -rf .imperial-lambda && rm -rf .test-*"
+    "clean": "rm -rf docking-station && rm -rf .test-*"
   },
   "repository": {
     "type": "git",

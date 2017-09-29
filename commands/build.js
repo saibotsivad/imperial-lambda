@@ -1,101 +1,44 @@
 const fs = require('fs')
 const mkdirp = require('mkdirp')
 const path = require('path')
-const jszip = require('jszip')
-const copyFile = require('cp-file')
+const buildZippedScript = require('../lib/build-zipped-script.js')
+const setupAmazonSqs = require('../lib/setup-amazon-sqs.js')
+const createAmazonLambda = require('../lib/aws-create-lambda.js')
 
-const rollup = require('rollup')
-const commonjs = require('rollup-plugin-commonjs')
-const nodeResolve = require('rollup-plugin-node-resolve')
-const babel = require('rollup-plugin-babel')
-const json = require('rollup-plugin-json')
+module.exports = (filePath, { region, queueName, role }) => {
+    if (!role && !process.env.AWS_ROLE_ARN) {
+        return Promise.reject('Must specify an AWS role using --role or exporting $AWS_ROLE_ARN')
+    }
 
-const runnable = script => `// This is an automatically built file. Do not edit it.
-import runnable from '${script}'
-export default runnable
-`
+    try {
+        fs.accessSync(filePath)
+    } catch (error) {
+        return Promise.reject('Could not locate runnable script at: ' + filePath)
+    }
 
-const runnablePackageJson = {
-    name: 'imperial-lambda-runnable',
-    version: '0.0.0',
-    description: 'Imperial-Lambda is a tool for running jobs in AWS Lambda.',
-    homepage: 'https://github.com/saibotsivad/imperial-lambda',
-    main: 'index.js',
-    engines: {
-        node: '>=6.10.0'
-    },
-    license: 'VOL'
-}
-
-module.exports = ({ buildFolder, cwd, script, concurrent, data }) => {
-    console.log('Building AWS Lambda script...')
-    // make the build folder to hold files
+    const buildFolder = path.join(__dirname, '../docking-station')
     mkdirp.sync(buildFolder)
-    // write the runnable data as a JSON file for importing
-    fs.writeFileSync(path.join(buildFolder, 'runnable.json'), JSON.stringify({ concurrent, data }, undefined, 2), { encoding: 'utf8' })
-    // write a module file which our scripts can then reference
-    fs.writeFileSync(path.join(buildFolder, 'runnable.js'), runnable(script), { encoding: 'utf8' })
-    // copy the lambda runnable for relative path goodness
-    copyFile.sync(path.join(__dirname, '../lib/lambda-runnable.js'), path.join(buildFolder, 'lambda-runnable.js'))
 
-    // rollup the runnable script into an AWS Lambda script
-    return rollup
-        .rollup({
-            input: path.join(buildFolder, 'lambda-runnable.js'),
-            format: 'cjs',
-            plugins: [
-                json(),
-                nodeResolve({
-                    jsnext: true,
-                    preferBuiltins: true,
-                    extensions: [ '.js', '.json' ]
-                }),
-                commonjs({
-                    ignore: [
-                        'electron',
-                        'http',
-                        'https',
-                        'buffer',
-                        'events',
-                        'stream',
-                        'url',
-                        'querystring',
-                        'zlib'
-                    ]
-                }),
-                babel({
-                    babelrc: false,
-                    presets: [
-                        [
-                            'es2015',
-                            {
-                                modules: false
-                            }
-                        ]
-                    ],
-                    plugins: [
-                        'external-helpers'
-                    ]
-                })
-            ]
-        })
-        .then(bundle => bundle.write({
-            file: path.join(buildFolder, 'build.js'),
-            format: 'cjs',
-            name: 'imperial-lambda'
-        }))
-        .then(() => {
-            // create the zip file
-            return new Promise(resolve => {
-                const zip = new jszip()
-                zip.file('index.js', fs.readFileSync(path.join(buildFolder, 'build.js'), { encoding: 'utf8' }))
-                zip.file('package.json', JSON.stringify(runnablePackageJson, undefined, 2))
-                zip
-                    .generateNodeStream({ type: 'nodebuffer', streamFiles: true })
-                    .pipe(fs.createWriteStream(path.join(buildFolder, 'build') + '.zip'))
-                    .on('finish', () => {
-                        resolve()
+    console.log('Configuring AWS services...')
+    return setupAmazonSqs({ region, queueName })
+        .then(awsConfiguration => {
+            fs.writeFileSync(path.join(buildFolder, 'aws.json'), JSON.stringify(awsConfiguration, undefined, 2), { encoding: 'utf8' })
+
+            console.log('Building Lambda runnable script...')
+            return buildZippedScript({ scriptPath: filePath })
+                .then(zipFile => {
+
+                    console.log('Deploying to AWS as Lambda function...')
+                    return createAmazonLambda(zipFile, {
+                        region,
+                        role: role || process.env.AWS_ROLE_ARN
                     })
-            })
+                    .catch(error => {
+                        if (error.name === 'ResourceConflictException') {
+                            return Promise.reject('A Lambda function already exists with that name.\nYou will need to delete it manually from AWS.')
+                        }
+                        throw error
+                    })
+                })
         })
 }

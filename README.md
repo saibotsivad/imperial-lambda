@@ -36,9 +36,9 @@ down your account pre-emptively.
 You will need to configure AWS (see below), and then proceed
 with the following commands:
 
-1. `build`: Construct the script which will be run in Lambda.
-2. `load`: Push script to AWS Lambda and configure SQS.
-3. `launch`: Run the scripts!
+1. `build`: Configure SQS, construct the runnable script, and
+    push it to Lambda.
+3. `launch`: Make concurrent Lambda requests.
 
 Run each of these with: `imperial-lambda [command]`
 
@@ -134,7 +134,6 @@ Log in to the [AWS Console](https://console.aws.amazon.com/) and then:
 4. Configure permissions, using `Attach existing policies`:
     * `AmazonSQSFullAccess`
     * `AWSLambdaFullAccess`
-    * `AmazonSNSFullAccess`
 5. Review and create user.
 6. Copy the `Access key ID` and the `Secret access key` for local use.
 
@@ -152,7 +151,7 @@ Replace the appropriate properties.
 
 1. Navigate to: `Services > IAM > Roles > Create Role`.
 2. Select `AWS Service` and `Lambda` for a role type.
-3. Attach the `AmazonSNSFullAccess` permission policy.
+3. Attach the `AmazonSQSFullAccess` permission policy.
 4. Select `Review` and name the role something like `imperial_shuttle`.
 5. Review and create role.
 6. Select the created role, and copy the `Role ARN` for local use.
