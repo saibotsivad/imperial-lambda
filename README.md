@@ -132,6 +132,7 @@ Log in to the [AWS Console](https://console.aws.amazon.com/) and then:
 2. Name the user something like `imperial_cli`.
 3. Give the user `Programmatic access`.
 4. Configure permissions, using `Attach existing policies`:
+    * `AmazonSNSFullAccess`
     * `AmazonSQSFullAccess`
     * `AWSLambdaFullAccess`
 5. Review and create user.
@@ -151,7 +152,7 @@ Replace the appropriate properties.
 
 1. Navigate to: `Services > IAM > Roles > Create Role`.
 2. Select `AWS Service` and `Lambda` for a role type.
-3. Attach the `AmazonSQSFullAccess` permission policy.
+3. Attach the `AmazonSNSFullAccess` permission policy.
 4. Select `Review` and name the role something like `imperial_shuttle`.
 5. Review and create role.
 6. Select the created role, and copy the `Role ARN` for local use.

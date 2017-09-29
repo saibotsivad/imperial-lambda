@@ -1,14 +1,10 @@
 {
     "data": {
         "request": {
-            "url": "https://fanx-apif-qa.azurewebsites.net/api/appdata",
+            "url": "http://site.com",
             "options": {
                 "headers": {
-                    "x-functions-key": "oecUiympBMqXSCNSNOZlyPzQuHUuA1uDjiIUXXQCdDXYH5gKggaWaQ==",
-                    "Content-Type": "application/json",
-                    "appPlatform": "Android",
-                    "appId": "AKTECH",
-                    "appVersion": "3.0.1"
+                    "x-auth-key": "abc123"
                 }
             }
         }

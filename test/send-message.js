@@ -1,16 +1,28 @@
-const SQS = require('aws-sdk/clients/sqs')
-const sqs = new SQS()
+const config = require('../docking-station/aws.json')
+const AWS = require('aws-sdk')
 
-sqs.config.update({
-    region: 'us-west-2'
+const DEFAULT_REGION = 'us-west-2'
+
+const sns = new AWS.SNS({
+    region: config.region || DEFAULT_REGION
 })
 
-const parameters = {
-    QueueUrl: "https://sqs.us-west-2.amazonaws.com/985731193180/imperial_lambda",
-    MessageBody: 'yolo'
+const runnable = {
+    configuration: {
+        guns: 10,
+        bullets: 10
+    },
+    data: {
+        number: 4
+    }
 }
 
-sqs.sendMessage(parameters, (error, result) => {
+const parameters = {
+    TopicArn: config.TopicArn,
+    Message: JSON.stringify(runnable),
+}
+
+sns.publish(parameters, (error, result) => {
     console.log('error', error)
     console.log('result', result)
 })
