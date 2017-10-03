@@ -2,6 +2,8 @@
 
 Run concurrent scripts on AWS Lambda, push the results to SQS, download locally.
 
+**NOTE: This project is definitely not production ready.**
+
 The primary use case for this is to do simple HTTP load testing, but
 the general case is if you want to run a large number of AWS Lambda
 instances to do some small chunk of work.
@@ -21,7 +23,7 @@ of time in I/O operations, such as HTTP/database requests.
 
 ## Legal Concerns
 
-***Misuse* of this module could result in jail time.**
+**Misuse of this module could result in jail time.**
 
 In particular, running load testing against a server is in
 fact a type of DDoS attack. Doing this to a server/service
@@ -156,6 +158,13 @@ Replace the appropriate properties.
 4. Select `Review` and name the role something like `imperial_shuttle`.
 5. Review and create role.
 6. Select the created role, and copy the `Role ARN` for local use.
+
+### TODO: After Lambda Creation
+
+This section should be automatable, but I can't figure out
+how to do it. For now, after you run `build` you will need
+to go out into Amazon to the Lambda, edit it, go into the
+"Triggers" section, and add the created SNS as a trigger.
 
 ## License
 

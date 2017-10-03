@@ -1,9 +1,12 @@
 const fs = require('fs')
 const path = require('path')
+const mkdirp = require('mkdirp')
 const promiseAll = require('p-all')
+const promiseWhile = require('p-whilst')
 
 const sendToSns = require('../lib/aws-send-sns-message.js')
-const readSqs = require('../lib/aws-read-sqs.js')
+const fetchSqsMessages = require('../lib/aws-read-sqs.js')
+const deleteSqsMessage = require('../lib/aws-delete-from-sqs.js')
 
 const helpText = `Launch the Imperial Lambda fleet.
   imperial-lambda launch [options] /path/to/configuration.json
@@ -29,8 +32,7 @@ module.exports = (filePath, argv) => {
 
     let runnable = {}
     if (!filePath) {
-        console.log(argv)
-        console.log('WARN: No configuration file specified.')
+        return Promise.reject('No configuration file specified.\n\n' + helpText)
     } else {
         try {
             fs.accessSync(filePath)
@@ -40,11 +42,6 @@ module.exports = (filePath, argv) => {
         }
     }
 
-    // const lambdas = parseInt(argv.l || argv.lambdas || 1, 10)
-    // if (lambdas > 100 && !argv.f && !argv.force) {
-    //     return Promise.reject('Amazon limits the fleet size to 100 Lambdas.\nIf you have contacted them and upgraded to a higher count, use -f or --force to continue.')
-    // }
-
     // the command line number overrides the configuration file numbers
     runnable.configuration = runnable.configuration || {}
     const guns = parseInt(argv.g || argv.guns || runnable.configuration.guns, 10) || 1
@@ -53,9 +50,8 @@ module.exports = (filePath, argv) => {
     runnable.configuration.guns = guns
     runnable.configuration.bullets = Math.round(bullets / guns)
 
-    const totalBulletsBeforeRounding = guns * bullets
     const totalBulletsAfterRounding = runnable.configuration.guns * runnable.configuration.bullets
-    const leftoverBullets = totalBulletsBeforeRounding - totalBulletsAfterRounding
+    const leftoverBullets = bullets - totalBulletsAfterRounding
     if (leftoverBullets) {
         console.log(`Ships could not be loaded with all bullets. Remaining: ${totalBulletsAfterRounding}`)
     }
@@ -80,8 +76,5 @@ module.exports = (filePath, argv) => {
             console.log(`Lambdas Launched:       ${runnable.configuration.bullets}`)
             console.log(`Shots Fired:            ${totalBulletsAfterRounding}`)
             return results
-        })
-        .then(() => {
-            console.log('Processing mission log...')
         })
 }
