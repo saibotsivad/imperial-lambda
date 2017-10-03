@@ -28,29 +28,45 @@ The response of this module is formatted to look like:
 
 */
 
-const now = () => new Date().getTime()
+const shift = (num, fuzz = 100) => {
+    return Math.round(num - (Math.random() * fuzz))
+}
 
 module.exports = ({ payload }) => {
+    const now = () => new Date().getTime()
+
     const request = payload.data.request
     const startTime = now()
-    return got(request.url, request.options)
+
+    const timestampCenter = request.timestampCenter || 0
+
+    const url = timestampCenter
+        ? `${request.url}?fetchTimestamp=${shift(timestampCenter, request.centerFuzziness)}`
+        : request.url
+
+    return got(url, request.options)
         .then(response => {
+            const endTime = now()
             return {
                 status: response.statusCode,
                 message: response.statusMessage,
-                url: response.url,
+                url,
                 configuration: payload.configuration,
                 startTime,
-                endTime: now()
+                endTime,
+                runTime: endTime - startTime
             }
         })
         .catch(error => {
+            const endTime = now()
             return {
                 status: error.statusCode,
                 error: error.message,
+                url,
                 configuration: payload.configuration,
                 startTime,
-                endTime: now()
+                endTime,
+                runTime: endTime - startTime
             }
         })
 }
