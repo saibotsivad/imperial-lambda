@@ -77,4 +77,41 @@ module.exports = (filePath, argv) => {
             console.log(`Shots Fired:            ${totalBulletsAfterRounding}`)
             return results
         })
+        // .then(() => {
+        //     console.log('Waiting for fleet to return...')
+        //     const messageFolder = path.join(__dirname, '../docking-station/messages')
+        //     mkdirp.sync(messageFolder)
+
+        //     const fetch = fetchSqsMessages(awsConfiguration)
+        //     const remove = deleteSqsMessage(awsConfiguration)
+        //     const messageMap = {}
+
+        //     return promiseWhile(() => {
+        //         // continue checking for new messages until all of them arrive
+        //         return true
+        //     }, () => {
+        //         return fetch()
+        //             .then(response => {
+        //                 console.log('fetched this many messages', response.Messages.length)
+        //                 const promises = response.Messages.map(message => () => {
+        //                     fs.writeFileSync(
+        //                         path.join(messageFolder, message.MessageId + '.json'),
+        //                         message.Body,
+        //                         { encoding: 'utf8' }
+        //                     )
+
+        //                     if (messageMap[message.MessageId]) {
+        //                         return Promise.resolve()
+        //                     }
+        //                     messageMap[message.MessageId] = true
+
+        //                     return remove({
+        //                         QueueUrl: awsConfiguration.QueueUrl,
+        //                         ReceiptHandle: message.ReceiptHandle
+        //                     })
+        //                 })
+        //                 return promiseAll(promises)
+        //             })
+        //     })
+        // })
 }
