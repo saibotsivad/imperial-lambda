@@ -2,15 +2,25 @@
 
 Run concurrent scripts on AWS Lambda, push the results to SQS, download locally.
 
-**NOTE: This project is definitely not production ready.**
+I initially made this to stress-test server configurations by making
+a very large number of simultaneous HTTP requests from the Lambda, however,
+you could more generally use this tool for anything that has a short
+run time and would benefit from distribution to a large number of machines.
 
-The primary use case for this is to do simple HTTP load testing, but
-the general case is if you want to run a large number of AWS Lambda
-instances to do some small chunk of work.
+## Incomplete Project
+
+There are many limitations described below, but one big limitation is
+that this project was never quite finished so you might want to use
+it more as a starting point. (I was able to test the server configuration
+enough to demonstrate it would handle an instantaneous load spike from 0
+to 25,000 requests per second, and that was sufficient for the client.)
+
+If you'd like help stress testing your server, I'm
+[available to help with that](https://davistobias.com/contact)!
 
 ## Lambda Limitations
 
-By default you can only run 100 simultaneous Lambda instances, but
+By default Amazon limits you to 100 simultaneous Lambda instances, but
 you can message Amazon and request them to increase the number.
 
 Lambdas have a short runtime enforced. If your executed code does
