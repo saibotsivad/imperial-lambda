@@ -1,5 +1,6 @@
 /node_modules
 /docking-station
 /example-*.json
+/secrets.sh
 .DS_Store
 .test-*

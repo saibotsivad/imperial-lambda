@@ -1,5 +1,28 @@
 # imperial-lambda
 
+
+http://starwars.wikia.com/wiki/Lambda-class_T-4a_shuttle/Legends
+
+
+  g      guns      1        Number of concurrent scripts to run per Lambda.
+  b      bullets   1        Number of total times to run the script across all Lambdas.
+
+
+
+        // https://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/SQS.html#sendMessageBatch-property
+
+
+
+> For more information on SQS queues, see here:
+>     https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-sqs-queues.html
+> In particular, if the order in which your payload is processed matters, or the
+> order of the output queue matters, you will need to set `FifoQueue` to `true`
+> for that queue, and also change the `QueueName` to end with the `.fifo` suffix.
+
+
+
+
+
 Run concurrent scripts on AWS Lambda, push the results to SQS, download locally.
 
 I initially made this to stress-test server configurations by making
