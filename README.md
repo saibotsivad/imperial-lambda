@@ -1,11 +1,151 @@
-# imperial-lambda
+# Imperial Lambda
 
-Run concurrent scripts on AWS Lambda, push the results to SQS, download locally.
+Load test your servers by firing massively concurrent HTTP request shots at it from AWS Lambdas.
 
-I initially made this to stress-test server configurations by making
-a very large number of simultaneous HTTP requests from the Lambda, however,
-you could more generally use this tool for anything that has a short
-run time and would benefit from distribution to a large number of machines.
+## Overview
+
+1. Construct a fleet of Lambdas that will make the HTTP requests.
+2. Prepare the ammunition by generating a folder of HTTP requests as JSON files.
+3. 
+
+Launch a single Lambda that will be re
+
+
+## Build the Fleet
+
+Copy the `secrets.example.sh` to `secrets.sh`
+
+```bash
+cp secrets.example.sh secrets.sh
+```
+
+Create an IAM role with the required permissions, and put the
+key details into the `secrets.sh` file.
+
+Then construct the fleet:
+
+```bash
+npm run build-fleet
+```
+
+This will create all resources in AWS.
+
+## Arm the Fleet
+
+
+
+## Launch the Fleet
+
+
+
+
+## Cost Estimate
+
+The cost of your fleet is dependent on the Lambda memory size and the time spent running. (See the [AWS Lambda pricing](https://aws.amazon.com/lambda/pricing/) details.)
+
+The pricing page shows costs at 100ms amounts, so an hour of Lambda runtime would be
+
+* 1 hour = 60 minutes
+* 1 minute = 60 seconds (3600 seconds)
+* 1 second = 1000 milliseconds (3,600,000 milliseconds)
+* 36,000 pricing units
+
+This makes the costs per Lambda, per hour:
+
+* 128MB at 0.000000208 is 0.007488$ or 7.49$ per kilo-Lambda-hours
+* 256MB at 0.000000417 is 0.015012$ or 15.01$ per kilo-Lambda-hours
+* 512MB at 0.000000834 is 0.030024$ or 30.03$ per kilo-Lambda-hours
+* 1024MB at 0.000001667 is 0.060012$ or 60.01$ per kilo-Lambda-hours
+* 2048MB at 0.000003334 is 0.120024$ or 120.03$ per kilo-Lambda-hours
+* 3008MB at 0.000004897 is 0.176292$ or 176.30$ per kilo-Lambda-hours
+
+There is an additional CloudWatch logging cost which is dependent on total request count, as well as how much data you are logging. For example, if all you want to log is the HTTP response status code, that's going to be less than cost than if you want to log the full body of each response.
+
+
+
+Also any other resources?
+
+Limits: https://docs.aws.amazon.com/lambda/latest/dg/limits.html
+- 1,000 concurrent Lambdas
+- 15 minute max timeout
+
+
+
+
+Assemble the fleet:
+
+```bash
+npm run deploy
+```
+
+
+
+
+```bash
+bash mission-control \
+launch \
+	--ships=10 \
+	--shipGuns=4 \
+	--gunBullets=100
+```
+
+This will launch 10 Lambdas, each processing through 100 total execution
+requests, and each Lambda running 4 requests concurrently.
+
+In this example, if each HTTP request took 1 second, and all Lambdas
+started execution simultaneously, you would see `4*10=40` simultaneous requests,
+`10*100=1000` total requests, and all requests would finish after `(100/4)=25`
+seconds.
+
+## Stack Design
+
+Your payload is executed on an AWS Lambda, in parallel with as many
+others as you want.
+
+The trigger for the Lambdas is an SQS queue. Each Lambda will grab
+a single item from the queue, which is a JSON object containing a
+payload like this:
+
+```json
+{
+	"config": {
+		"id": "1",
+		"concurrent": 10,
+		"parameters": {
+			"url": "https://site.com/foo/bar",
+			"method": "get"
+		}
+	},
+	"payloads": [
+		{
+			"id": "1"
+		},
+		{
+			"id": "2"
+		}
+	]
+}
+```
+
+Each Lambda instance will execute all given `payloads` in parallel, with
+the `config.concurrent` limiting the number of concurrently running
+payloads.
+
+The properties in `config.parameters` are shared across each execution,
+and merged with any properties in the payload.
+
+Each payload object must have an `id` property set.
+
+For each payload result, the saved output will be referenced by the
+combination of the `config.id` and the payload `id`, e.g. for the
+above example payload the identifiers would be `"1:1"` and `"1:2"`.
+
+
+
+
+
+
+
 
 ## Incomplete Project
 
@@ -49,7 +189,7 @@ You will need to configure AWS (see below), and then proceed
 with the following commands:
 
 1. `build`: Configure SQS, construct the runnable script, and
-    push it to Lambda.
+	push it to Lambda.
 3. `launch`: Make concurrent Lambda requests.
 
 Run each of these with: `imperial-lambda [command]`
@@ -78,13 +218,13 @@ The configuration file is a JSON object which is used to configure the
 imperial-lambda runner. It has the following properties:
 
 * `script` *(string, required)*: The path to the runnable script, relative
-    to the JSON file.
+	to the JSON file.
 * `data` *(optional)*: This object is passed to your runnable script.
 * `lambdas` *(number, optional, default `1`)*: The number of lambdas to
-    run simultaneously. (See below for limitations and concerns.)
+	run simultaneously. (See below for limitations and concerns.)
 * `concurrent` *(number, optional, default `1`)*: The number of
-    concurrent processes to run. (Lambdas operate within a single thread,
-    so you may not see any benefit to increasing this number.)
+	concurrent processes to run. (Lambdas operate within a single thread,
+	so you may not see any benefit to increasing this number.)
 
 ## Script Design
 
@@ -92,8 +232,8 @@ Your runnable script should look like this:
 
 ```js
 export default function({ data, event, context }) {
-    // do your work
-    return THE_PAYLOAD_TO_PUT_IN_SQS
+	// do your work
+	return THE_PAYLOAD_TO_PUT_IN_SQS
 }
 ```
 
@@ -102,8 +242,8 @@ specified when running this program. For example, given this object:
 
 ```json
 {
-    "script": "./runnable.js",
-    "data": "hello"
+	"script": "./runnable.js",
+	"data": "hello"
 }
 ```
 
@@ -123,7 +263,7 @@ If you return a promise, an object will be placed in SQS containing the
 following properties:
 
 * `status` (string): This reflects the status of your promise, either
-    `"resolved"` or `"rejected"`.
+	`"resolved"` or `"rejected"`.
 * `value`: This will be the result of the resolved or rejected promise.
 
 These objects are placed in Amazon SQS as JSON objects, and those objects
@@ -144,9 +284,9 @@ Log in to the [AWS Console](https://console.aws.amazon.com/) and then:
 2. Name the user something like `imperial_cli`.
 3. Give the user `Programmatic access`.
 4. Configure permissions, using `Attach existing policies`:
-    * `AmazonSNSFullAccess`
-    * `AmazonSQSFullAccess`
-    * `AWSLambdaFullAccess`
+	* `AmazonSNSFullAccess`
+	* `AmazonSQSFullAccess`
+	* `AWSLambdaFullAccess`
 5. Review and create user.
 6. Copy the `Access key ID` and the `Secret access key` for local use.
 

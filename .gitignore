@@ -1,5 +1,6 @@
 /node_modules
-/docking-station
-/example-*.json
+/configuration.sh
+/.serverless
 .DS_Store
-.test-*
+*.test.js
+/logs-*

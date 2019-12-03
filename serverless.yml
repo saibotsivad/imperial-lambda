@@ -1,0 +1,50 @@
+service:
+  name: imperial-lambda
+
+provider:
+  name: aws
+  stage: dev
+  region: us-east-1
+  logRetentionInDays: 1
+  deploymentPrefix: imperial-lambda
+
+package:
+  excludeDevDependencies: true
+  exclude:
+    - .serverless/**
+    - .git/**
+    - package-lock.json
+    - secrets.example.sh
+    - secrets.sh
+    - serverless.yml
+    - node_modules/.bin/**
+    - README.md
+    - example-queue-item.json
+
+functions:
+  imperial-lambda-fire:
+    handler: lambda-fire.handler
+    runtime: nodejs12.x
+    memorySize: ${env:IMPERIAL_LAMBDA_MEMORY_SIZE}
+    timeout: ${env:IMPERIAL_LAMBDA_TIMEOUT_SECONDS}
+    # events:
+    #   - stream:
+    #       arn: ${cf:${self:service}:dev:streamName}
+    #       batchSize: 1
+    #       startingPosition: LATEST
+    #       enabled: true
+
+# resources:
+#   Resources:
+#     ImperialLambdaStream:
+#       Type: AWS::Kinesis::Stream
+#       Properties:
+#         Name: ImperialLambdaStream
+#         RetentionPeriodHours: 12
+#         ShardCount: 1
+#   Outputs:
+#     streamName:
+#       Value:
+#         'Fn::GetAtt': ["ImperialLambdaStream", "Arn"]
+#       Export:
+#         Name: ${self:service}:dev:streamName

@@ -1,0 +1,20 @@
+{
+	"config": {
+		"id": "1",
+		"concurrent": 2,
+		"parameters": {
+			"url": "http://davistobias.com/",
+			"method": "get"
+		},
+		"response": [
+			"statusCode",
+			"headers.etag"
+		]
+	},
+	"payloads": [
+		{},
+		{},
+		{},
+		{}
+	]
+}
